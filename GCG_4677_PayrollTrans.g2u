@@ -1,0 +1,211 @@
+Program.Sub.ScreenSU.Start
+Gui.Form..Create
+Gui.Form..Caption("Payroll Transaction")
+Gui.Form..Size(6960,3525)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..BackColor(-2147483633)
+Gui.Form..MaxButton(False)
+Gui.Form..MousePointer(0)
+Gui.Form..Sizeable(False)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.lbl1.Create(Label,"Start Date",True,870,255,0,240,330,True,0,"Arial",8,-2147483633,0)
+Gui.Form.dtpStartDate.Create(DatePicker)
+Gui.Form.dtpStartDate.Size(1170,285)
+Gui.Form.dtpStartDate.Position(1155,240)
+Gui.Form.lbl2.Create(Label,"End Date",True,795,255,0,3690,330,True,0,"Arial",8,-2147483633,0)
+Gui.Form.dtpEndDate.Create(DatePicker)
+Gui.Form.dtpEndDate.Size(1170,285)
+Gui.Form.dtpEndDate.Position(4560,240)
+Gui.Form.chkAllDates.Create(CheckBox)
+Gui.Form.chkAllDates.Size(1125,360)
+Gui.Form.chkAllDates.Position(240,765)
+Gui.Form.chkAllDates.Caption("All Dates")
+Gui.Form.chkAllDates.Event(Click,chkAllDates_Click)
+Gui.Form.lbl3.Create(Label,"Start Employee",True,1290,255,0,240,1410,True,0,"Arial",8,-2147483633,0)
+Gui.Form.txtStartEmp.Create(TextBox,"",True,1215,300,0,1560,1320,True,0,"Arial",8,-2147483643,1)
+Gui.Form.cmdStartEmp.Create(Button)
+Gui.Form.cmdStartEmp.Size(330,330)
+Gui.Form.cmdStartEmp.Position(2850,1305)
+Gui.Form.cmdStartEmp.Caption("^")
+Gui.Form.cmdStartEmp.Event(Click,cmdStartEmp_Click)
+Gui.Form.lbl4.Create(Label,"End Employee",True,1215,255,0,3495,1410,True,0,"Arial",8,-2147483633,0)
+Gui.Form.txtEndEmp.Create(TextBox,"",True,1215,300,0,4755,1320,True,0,"Arial",8,-2147483643,1)
+Gui.Form.cmdEndEmp.Create(Button)
+Gui.Form.cmdEndEmp.Size(330,330)
+Gui.Form.cmdEndEmp.Position(6045,1305)
+Gui.Form.cmdEndEmp.Caption("^")
+Gui.Form.cmdEndEmp.Event(Click,cmdStartEmp_Click)
+Gui.Form.chkAllEmp.Create(CheckBox)
+Gui.Form.chkAllEmp.Size(1560,360)
+Gui.Form.chkAllEmp.Position(240,1935)
+Gui.Form.chkAllEmp.Caption("All Employees")
+Gui.Form.chkAllEmp.Event(Click,chkAllEmp_Click)
+Gui.Form.cmdPrint.Create(Button)
+Gui.Form.cmdPrint.Size(855,375)
+Gui.Form.cmdPrint.Position(240,2415)
+Gui.Form.cmdPrint.Caption("OK")
+Gui.Form.cmdPrint.Event(Click,cmd1_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+V.Global.iBiRunID.Declare(Long)
+V.Global.IBiLogID.Declare(Long)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+'This runs from a Custom Menu item as a Report.  The report is GCG_4677_PY_Payroll_Summary_Empl.rpt.  
+'We are only passing parameters to the report.
+'Created by SKC on 8/30/2017 for Automatic Products Corp.  Anyone else using this will need a quote if they have issues.
+v.Local.iID.Declare(Long)
+F.ODBC.Connection!conx.OpenConnection(v.Ambient.PDSN, v.Ambient.PUser, v.Ambient.PPass)
+F.Global.BI.GetIDFromName("GCG_4677_PY_Payroll_Summary_Empl.rpt",V.Local.iID)
+F.Global.BI.GetRunID(V.Global.iBiRunID)
+F.Global.BI.StartLogging(V.Global.iBiRunID,V.Local.iID,-1,"GCG_4677_PY_Payroll_Summary_Empl.rpt",V.Global.iBiLogID)
+Gui.Form..Show
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.Main.End
+
+Program.Sub.cmdStartEmp_Click.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+'Get the Employee ID and save to the textbox
+v.Local.sRet.Declare(String)
+F.Intrinsic.UI.Browser(51, "", v.Local.sRet)
+F.Intrinsic.Control.If(v.Local.sRet, !=, "***CANCEL***")
+	F.Intrinsic.String.Split(v.Local.sRet, "*!*", v.Local.sRet)
+	F.Intrinsic.Control.If(v.Args.ControlName, =, "CMDSTARTEMP")		
+		Gui.Form.txtStartEmp.Text(v.Local.sRet(0).Trim)
+	f.Intrinsic.Control.Else
+		Gui.Form.txtEndEmp.Text(v.Local.sRet(0).Trim)
+	f.Intrinsic.Control.EndIf
+F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.cmdStartEmp_Click.End
+
+Program.Sub.cmd1_Click.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+'Pass the Parameters to the report
+V.Local..BulkDeclareString(sParam, sVal, sSql, sRet, sSDate, sEDate)
+v.Local.iID.Declare(Long)
+F.Global.BI.GetIDFromName("GCG_4677_PY_Payroll_Summary_Empl.rpt",V.Local.iID)
+F.Intrinsic.Control.If(v.Screen.Form!chkAllDates.Value, =, 1)
+	v.Local.sEDate.Set(v.Ambient.date.datecomp)
+
+	F.Intrinsic.String.Build("1900-01-01*!**!*{0}", v.Local.sEDate.PervasiveDate, v.Local.sVal)
+F.Intrinsic.Control.Else
+	v.Local.sSDate.Set(v.Screen.Form!dtpStartDate.Value)
+	v.Local.sEDate.Set(v.Screen.Form!dtpEndDate.Value)
+	
+	F.Intrinsic.String.Build("{0}*!**!*{1}", v.Local.sSDate.PervasiveDate,v.Local.sedate.PervasiveDate, v.Local.sVal)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.If(v.Screen.Form!txtStartEmp.text, =, "")
+	v.Local.sSql.Set("Select Top 1 Employee from Employee_Mstr Order by Employee asc")
+	F.ODBC.Connection!conx.ExecuteAndReturn(v.Local.sSql, v.Local.sRet)
+F.Intrinsic.Control.Else
+	v.Local.sRet.Set(v.Screen.Form!txtStartEmp.Text)
+F.Intrinsic.Control.EndIf
+F.Intrinsic.String.Build("{0}*!*{1}", v.Local.sVal, v.Local.sRet, v.Local.sVal)
+
+F.Intrinsic.Control.If(v.Screen.Form!txtEndEmp.text, =, "")
+	v.Local.sSql.Set("Select Top 1 Employee from Employee_Mstr Order by Employee desc")
+	F.ODBC.Connection!conx.ExecuteAndReturn(v.Local.sSql, v.Local.sRet)
+F.Intrinsic.Control.Else
+	v.Local.sRet.Set(v.Screen.Form!txtEndEmp.Text)
+F.Intrinsic.Control.EndIf
+F.Intrinsic.String.Build("{0}*!*{1}", v.Local.sVal, v.Local.sRet, v.Local.sVal)
+
+V.Local.sParam.Set("StartPayDate*!*Caller*!*EndPayDate*!*StartEmp*!*EndEmp")
+
+
+F.Global.BI.StopLogging(V.Global.iBILogID)
+F.Global.BI.RunReportPreProcessor(V.Global.iBIRunID,V.Global.iBILogID,V.Local.sParam,V.Local.sVal,"GCG_4677_PY_Payroll_Summary_Empl.rpt",-1,True,"",-1,"",-1,"","",V.Global.iBIRunID)
+F.Intrinsic.Control.CallSub("Form_Unload")
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.cmd1_Click.End
+
+Program.Sub.chkAllDates_Click.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+'Enable and disable the date control depending on if all dates are checked
+F.Intrinsic.Control.If(v.Screen.Form!chkAllDates.Value, =, 1)
+	Gui.Form.dtpStartDate.Enabled(False)
+	Gui.Form.dtpEndDate.Enabled(False)
+F.Intrinsic.Control.Else
+	Gui.Form.dtpStartDate.Enabled(True)
+	Gui.Form.dtpEndDate.Enabled(True)
+F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.chkAllDates_Click.End
+
+Program.Sub.chkAllEmp_Click.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+'Enable or Disable the employee textboxes based on the checkbox for all
+F.Intrinsic.Control.If(v.Screen.Form!chkAllEmp.Value, =, 1)
+	Gui.Form.txtStartEmp.Text("")
+	Gui.Form.txtEndEmp.Text("")
+	Gui.Form.txtStartEmp.Enabled(False)
+	Gui.Form.txtEndEmp.Enabled(False)
+F.Intrinsic.Control.Else
+	Gui.Form.txtStartEmp.Enabled(True)
+	Gui.Form.txtEndEmp.Enabled(True)
+	gui.Form.txtStartEmp.SetFocus
+F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.chkAllEmp_Click.End
+
+Program.Sub.Form_UnLoad.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+V.Local.sError.Declare(String)
+F.ODBC.Connection!conx.Close
+F.Intrinsic.Control.End
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4677_PayrollTrans.g2u",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form_RouterMaint_Unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.Form_UnLoad.End
